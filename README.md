@@ -5,13 +5,14 @@ This project provides a two-part solution for creating and displaying dynamic, i
 The provided timeline-builder.html file is a self-contained web application that serves as the visual interface for creating your timeline. You can simply open this file in a modern web browser to use it.
 
 Key Features:
-User-Friendly Interface: The builder allows you to easily input the timeline's title, start and end dates, and tick increments.
 
-Live Preview: As you add and edit events, a live, visual representation of your timeline is rendered directly on the page, allowing you to fine-tune its appearance.
-
-Wikitext Generation: The application automatically generates the Wikitext you need. This code includes all your timeline data encoded in a simple, easy-to-use format.
-
-Load from Wikitext: You can copy the Wikitext from an existing timeline on your wiki and paste it into the builder. The app will parse the data and populate the form fields, allowing you to easily edit and update a previously created timeline.
+   1. User-Friendly Interface: The builder allows you to easily input the timeline's title, start and end dates, and tick increments.
+   
+   2. Live Preview: As you add and edit events, a live, visual representation of your timeline is rendered directly on the page, allowing you to fine-tune its appearance.
+   
+   3. Wikitext Generation: The application automatically generates the Wikitext you need. This code includes all your timeline data encoded in a simple, easy-to-use format.
+   
+   4. Load from Wikitext: You can copy the Wikitext from an existing timeline on your wiki and paste it into the builder. The app will parse the data and populate the form fields, allowing you to easily edit and update a previously created timeline.
 
 2. Wiki pages
    1. Template:Timeline - collects the wikitext you paste and passes it on to Module:Timeline. Stored in template.html

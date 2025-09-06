@@ -9,8 +9,6 @@ User-Friendly Interface: The builder allows you to easily input the timeline's t
 
 Live Preview: As you add and edit events, a live, visual representation of your timeline is rendered directly on the page, allowing you to fine-tune its appearance.
 
-Collision Detection: The builder automatically adjusts the vertical position of event labels to prevent them from overlapping, ensuring readability. It also measures the size of each label box and passes this information to the Lua module, so the module can reproduce the same layout.
-
 Wikitext Generation: The application automatically generates the Wikitext you need. This code includes all your timeline data encoded in a simple, easy-to-use format.
 
 Load from Wikitext: You can copy the Wikitext from an existing timeline on your wiki and paste it into the builder. The app will parse the data and populate the form fields, allowing you to easily edit and update a previously created timeline.

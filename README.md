@@ -14,6 +14,8 @@ Key Features:
    
    4. Load from Wikitext: You can copy the Wikitext from an existing timeline on your wiki and paste it into the builder. The app will parse the data and populate the form fields, allowing you to easily edit and update a previously created timeline.
 
+Along with these are a number of smaller features that are mirrored by the lua code in the module, features that simply make the timeline work correctly, such as collision detection, alternating sides, auto-adjusting box-width, etc.
+
 2. Wiki pages
    1. Template:Timeline - collects the wikitext you paste and passes it on to Module:Timeline. Stored in template.html
    2. Template:Timeline/doc - contains all the documentation for how to create a timeline using this software. Stored in doc.html

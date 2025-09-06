@@ -90,7 +90,7 @@
             left: 50%;
             transform: translateX(-50%);
             z-index: 25;
-            height: 20px;
+            height: 40px;
         }
         .event-above .event-line { bottom: 50%; }
         .event-below .event-line { top: 50%; }
@@ -203,12 +203,12 @@
             };
 
             /**
-            * Calculates the position as the eventDate's percentage of the timeline's extendedRange
-            * @param {number} eventDate - The timestamp of the event.
-            * @param {number} startDate - The start timestamp of the timeline range.
-            * @param {number} endDate - The end timestamp of the timeline range.
-            * @returns {number} The position as a percentage (0-100).
-            */
+             * Calculates the position as the eventDate's percentage of the timeline's extendedRange
+             * @param {number} eventDate - The timestamp of the event.
+             * @param {number} startDate - The start timestamp of the timeline range.
+             * @param {number} endDate - The end timestamp of the timeline range.
+             * @returns {number} The position as a percentage (0-100).
+             */
             const calculatePositionPercentage = (eventDate, startDate, endDate) => {
             // Ensure the inputs are valid to prevent errors.
             if (endDate <= startDate) {
@@ -292,6 +292,9 @@
                 const title = timelineTitleInput.value;
                 const minorIncrement = parseFloat(minorIncrementInput.value) || 0;
                 const majorIncrement = parseFloat(majorIncrementInput.value) || 0;
+                
+                // Change `boxHeight` from `const` to `let` so it can be assigned a value.
+                let boxHeight = 0; 
 
                 // Clear the preview and re-add the main line
                 timelinePreview.innerHTML = '';
@@ -344,13 +347,13 @@
                     }
                 });
 
+
                 // Sort events chronologically to determine their display order
                 events.sort((a, b) => a.date - b.date);
 
-                // --- Two-Pass Rendering for Collision Detection ---
+                // --- Two-Pass Rendering for Collision Detection and Width Measurement ---
                 // The first pass renders all elements to get their dimensions, which are
                 // required for the collision detection in the second pass.
-
                 const eventElements = [];
                 events.forEach((event, index) => {
                     const position = calculatePositionPercentage(event.date , extendedStart, extendedEnd);
@@ -370,9 +373,22 @@
                             </div>
                         `;
                         timelinePreview.appendChild(eventElement);
-                        eventElements.push({ element: eventElement, position: position, isAbove: isAbove });
+                        eventElements.push({ element: eventElement, position: position, isAbove: isAbove, originalEvent: event });
                     }
                 });
+                
+                // --- NEW LOGIC: MEASURE WIDTHS AND HEIGHTS AFTER RENDERING ---
+                // This ensures the elements have been rendered and have their final dimensions
+                eventElements.forEach(event => {
+                    const labelBox = event.element.querySelector('.event-label-box');
+                    // Store the measured width directly on the original event object
+                    event.originalEvent.width = labelBox.offsetWidth;
+                });
+                
+                // Now we can safely get the max height of all event boxes
+                if (eventElements.length > 0) {
+                     boxHeight = Math.max(...eventElements.map(e => e.element.querySelector('.event-label-box').offsetHeight));
+                }
 
                 // Pass 2: Calculate and apply vertical positioning based on dimensions
                 const lastEventState = {
@@ -412,16 +428,19 @@
                     currentState.width = labelBoxWidth;
                 });
 
-                // Update wikitext with the sorted events
+                // Update wikitext with the sorted events, now including the width
                 const timelineData = {
                     title: title,
                     start_date: startDateStr, // Use the original string for wikitext
-                    end_date: endDateStr,     // Use the original string for wikitext
+                    end_date: endDateStr,      // Use the original string for wikitext
                     minor_increment: minorIncrement,
                     major_increment: majorIncrement,
+                    boxHeight: boxHeight, // This is now a calculated value
                     events: events.map(e => ({
                         date: e.date_label, // Use the original string for wikitext
-                        label: e.label
+                        label: e.label,
+                        // --- NEW: ADD THE MEASURED WIDTH TO THE JSON ---
+                        width: e.width
                     }))
                 };
                 
@@ -484,5 +503,3 @@
     </script>
 </body>
 </html>
-
-

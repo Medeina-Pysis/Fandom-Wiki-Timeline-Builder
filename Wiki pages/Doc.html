@@ -1,0 +1,134 @@
+== Description ==
+This template renders a beautiful, interactive timeline using a Lua module. The timeline's appearance and functionality are a direct port of the Fandom Wiki Timeline Builder tool. You will be able to freely add events, alter the range of the timeline, change the name of events, or even embed links to other pages in the wiki. 
+
+== Syntax ==
+<pre>
+{{Timeline|data=<nowiki>{...}</nowiki>}}
+
+</pre>
+
+== Usage ==
+To use this template, you will need to take 4 steps.
+# navigate to https://medeina-pysis.github.io/Fandom-Wiki-Timeline-Builder/
+# Enter your all the information for your timeline
+# Scroll down and click on the Copy Wikitext button
+# Navigate back to your article and paste the Wikitext in the desired location
+
+'''NOTE:''' The builder tool is used only to generate the data. The actual timeline rendering happens here on the wiki.
+
+== Sample output ==
+The following is an example of some wikitext that generates a timeline.
+<pre>{{Timeline|data={
+  "title": "",
+  "start_date": "-200",
+  "end_date": "500",
+  "minor_increment": 10,
+  "major_increment": 50,
+  "boxHeight": 58,
+  "events": [
+    {
+      "date": "-150",
+      "label": "First Demons Arrive",
+      "width": 160
+    },
+    {
+      "date": "-135",
+      "label": "Ashen veil",
+      "width": 95
+    },
+    {
+      "date": "-50",
+      "label": "Cresten falls",
+      "width": 110
+    },
+    {
+      "date": "0",
+      "label": "the great war",
+      "width": 114
+    },
+    {
+      "date": "120",
+      "label": "Elven betrayal",
+      "width": 121
+    },
+    {
+      "date": "170",
+      "label": "Draken Founded",
+      "width": 136
+    },
+    {
+      "date": "200",
+      "label": "Ashen Treaty",
+      "width": 116
+    },
+    {
+      "date": "325",
+      "label": "The War of Worlds",
+      "width": 151
+    },
+    {
+      "date": "400",
+      "label": "Valkyrie's Stand",
+      "width": 136
+    }
+  ]
+}
+}}</pre>
+
+{{#invoke:Timeline|render |data={
+  "title": "",
+  "start_date": "-200",
+  "end_date": "500",
+  "minor_increment": 10,
+  "major_increment": 50,
+  "boxHeight": 58,
+  "events": [
+    {
+      "date": "-150",
+      "label": "First Demons Arrive",
+      "width": 160
+    },
+    {
+      "date": "-135",
+      "label": "Ashen veil",
+      "width": 95
+    },
+    {
+      "date": "-50",
+      "label": "Cresten falls",
+      "width": 110
+    },
+    {
+      "date": "0",
+      "label": "the great war",
+      "width": 114
+    },
+    {
+      "date": "120",
+      "label": "Elven betrayal",
+      "width": 121
+    },
+    {
+      "date": "170",
+      "label": "Draken Founded",
+      "width": 136
+    },
+    {
+      "date": "200",
+      "label": "Ashen Treaty",
+      "width": 116
+    },
+    {
+      "date": "325",
+      "label": "The War of Worlds",
+      "width": 151
+    },
+    {
+      "date": "400",
+      "label": "Valkyrie's Stand",
+      "width": 136
+    }
+  ]
+} }}
+
+<includeonly>[[Category:Data-templates]]</includeonly><noinclude>[[Category:Template documentation]]</noinclude>

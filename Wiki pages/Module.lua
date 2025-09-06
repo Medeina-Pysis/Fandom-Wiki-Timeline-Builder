@@ -1,9 +1,8 @@
---[[
-This module takes JSON data from a wiki timeline builder and renders the
-corresponding HTML. It now relies on a separate CSS file (MediaWiki:Common.css) for styling,
-removing all inline style attributes.
-]]--
-local p = {}
+-- Module:Timeline
+-- This Lua module takes JSON data from a wiki timeline builder and renders the
+-- corresponding HTML. It handles calculating positions for ticks and events
+-- and dynamically generates the complete timeline structure with inline styles.
+local p = {} 
 
 -- Main function to render the timeline from JSON data
 function p.render(frame)
@@ -59,29 +58,34 @@ function p.render(frame)
             return "<b>Error:</b> Invalid date range or buffer calculation resulted in a zero range."
         end
 
-        local html = {}
-
+    -- Part 3: HTML Structure and Dynamic Styling
+    -- This section builds the HTML structure of the timeline with inline styles.
+        
         -- Function to calculate the position of a date on the extended timeline.
         local function calculate_position(date_value)
             return ((date_value - extended_start) / extended_range) * 100
         end
 
-    -- Part 3: HTML Structure and Dynamic Styling
-    -- This section builds the HTML structure of the timeline with inline styles.
+        -- Initialize HTML parts.
+        local html = {}
 
         -- Add the main wrapper.
-        table.insert(html, '<div class="timeline-wrapper">')
+        table.insert(html, '<div class="timeline-wrapper" style="box-sizing: border-box; width: 100%; overflow-x: auto; background-color: #f8f9fa; border: 1px solid #e0e2e4; border-radius: 8px; padding: 1rem; margin: 1rem 0;">')
 
         -- Timeline Title
-        if title and title ~= "" then
-            table.insert(html, string.format('<h2 class="timeline-title">%s</h2>', title))
-        end
+
+        -- Uncomment the following lines to include a title at the top of the timeline.
+        -- I've commented it out for now to keep the focus on the timeline itself.
+        
+        -- if title and title ~= "" then
+        --     table.insert(html, string.format('<h2 class="timeline-title" style="position: absolute; top: 1rem; left: 50%%; transform: translateX(-50%%); font-size: 1.5rem; font-weight: 700; color: #202122; text-align: center; width: 100%%;">%s</h2>', title))
+        -- end
 
         -- Container for the timeline itself.
-        table.insert(html, '<div class="timeline-container">')
+        table.insert(html, '<div class="timeline-container" style="position: relative; padding: 4rem 1rem 3rem; min-height: 350px; width: 960px; overflow-x: hidden; display: flex; flex-direction: column; justify-content: center;">')
 
         -- The main line, extended to account for padding.
-        table.insert(html, '<div class="timeline-line-extended"></div>')
+        table.insert(html, '<div class="timeline-line-extended" style="position: absolute; top: 50%; left: 0; width: 100%; height: 4px; background-color: #9ca3af; transform: translateY(-50%); z-index: 10; border-radius: 2px;"></div>')
 
         -- Minor Ticks and Labels
         local tick_positions = {}
@@ -112,16 +116,20 @@ function p.render(frame)
             table.sort(tick_positions, function(a, b) return a.pos < b.pos end)
             
             for _, tick in ipairs(tick_positions) do
-                local tick_class = (tick.type == "major") and "timeline-tick-major" or "timeline-tick-minor"
-                local tick_html = string.format('<div class="%s" style="left: %f%%;">', tick_class, tick.pos)
+                local tick_style = string.format("position: absolute; top: 50%%; background-color: %s; z-index: 20; transform: translateY(-50%%) translateX(-50%%); left: %f%%;",
+                    (tick.type == "major") and "#4b5563" or "#d1d5db",
+                    tick.pos)
+
+                local tick_size = (tick.type == "major") and 'height: 15px; width: 4px; border-radius: 2px;' or 'height: 10px; width: 2px;'
+                
+                table.insert(html, string.format('<div style="%s %s"></div>', tick_style, tick_size))
                 
                 -- Add labels for major ticks only
                 if tick.type == "major" then
-                    tick_html = tick_html .. string.format('<span class="timeline-tick-label">%s</span>', tick.label)
+                    -- Position labels relative to the timeline line
+                    local label_style = string.format("position: absolute; top: calc(50%% + 0.6rem); left: %f%%; transform: translateX(-50%%); white-space: nowrap; font-size: 0.75rem; color: #4b5563; background-color: #f3f4f6; padding: 0 4px; z-index: 40;", tick.pos)
+                    table.insert(html, string.format('<div style="%s">%s</div>', label_style, tick.label))
                 end
-                
-                tick_html = tick_html .. '</div>'
-                table.insert(html, tick_html)
             end
 
         -- Render events
@@ -137,6 +145,22 @@ function p.render(frame)
 
             local side_toggle = "below" -- Initial side to start with
 
+            -- A table to track the last horizontal position rendered on each side.
+            local last_positions = { above = -math.huge, below = -math.huge }
+            -- A table to track the vertical stack level on each side.
+            local stack_levels = { above = 0, below = 0 }
+
+            -- This threshold (in percentage) determines how close events can be.
+            local collision_threshold = 4 -- 4% is a good starting point
+            -- A known height of a single label box in 'rem', including padding.
+            local box_height_rem = 3.5
+            -- The gap between stacked boxes in 'rem'.
+            local gap_rem = (0.3125/3.5) * box_height_rem -- 5px / 16px (standard rem)
+            -- The initial base offset from the timeline line, to account for dot and line height.
+            local base_offset_rem = 2.5
+            -- The base height of the connector line.
+            local line_base_height_rem = 2.5 -- Equivalent to 40px
+
             -- Loop through events and render them
             for _, event in ipairs(sorted_events) do
                 local position = calculate_position(tonumber(event.date))
@@ -148,16 +172,41 @@ function p.render(frame)
                     side_toggle = "below"
                 end
                 
-                -- Event wrapper
-                table.insert(html, string.format('<div class="timeline-event-wrapper %s" style="left: %f%%;">', side_toggle, position))
-                table.insert(html, '<div class="event-dot"></div>')
-                table.insert(html, '<div class="event-line"></div>')
-                table.insert(html, '<div class="event-label-box">')
-                table.insert(html, string.format('<span style="font-weight: 700;">%s</span>', tostring(event.label)))
-                table.insert(html, string.format('<br><span style="font-size: 0.75rem; color: #ef4444;">%s</span>', tostring(event.date_label)))
-                table.insert(html, '</div>')
-                table.insert(html, '</div>')
+                -- Check for a collision on the current side.
+                if position - last_positions[side_toggle] < collision_threshold then
+                    -- Collision: increase stack level. last_positions stays the same.
+                    stack_levels[side_toggle] = stack_levels[side_toggle] + 1
+                else
+                    -- No collision: this is a new "base" event. Reset stack and update last_positions.
+                    stack_levels[side_toggle] = 0
+                    last_positions[side_toggle] = position
+                end
 
+                -- Calculate the vertical offset based on the stack level and box height.
+                local vertical_offset_rem = base_offset_rem + (stack_levels[side_toggle] * (box_height_rem + gap_rem))
+                
+                -- Calculate the new height of the connector line based on the stack level.
+                local line_height_rem = line_base_height_rem + (stack_levels[side_toggle] * (box_height_rem + gap_rem))
+                
+                local event_html = string.format(
+                    '<div class="event-wrapper" style="position: absolute; top: 50%%; left: %f%%; transform: translateY(-50%%); z-index: 30; text-align: center; display: flex; align-items: center; justify-content: center; %s;">' ..
+                        '<div class="event-dot" style="position: absolute; top: 50%%; left: 50%%; transform: translate(-50%%, -50%%); width: 16px; height: 16px; background-color: #ef4444; border-radius: 50%%; z-index: 50;"></div>' ..
+                        '<div class="event-line" style="position: absolute; left: 50%%; transform: translateX(-50%%); width: 2px; height: %frem; background-color: #ef4444; z-index: 25; %s: 50%%;"></div>' ..
+                        '<div class="event-label-box" style="position: absolute; left: 50%%; transform: translateX(-50%%); background-color: #fff; padding: 0.5rem 0.75rem; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); white-space: nowrap; font-size: 0.875rem; z-index: 60; %s: calc(50%% + %frem);">' ..
+                            '<span style="font-weight: 700; color: #4b5563;">%s</span>' ..
+                            '<br><span style="font-size: 0.75rem; color: #ef4444;">%s</span>' ..
+                        '</div>' ..
+                    '</div>',
+                    position,
+                    (side_toggle == "above") and "flex-direction: column-reverse;" or "flex-direction: column;",
+                    line_height_rem, -- NEW: Dynamic height for the connector line
+                    (side_toggle == "above") and "bottom" or "top",
+                    (side_toggle == "above") and "bottom" or "top",
+                    vertical_offset_rem,
+                    tostring(event.label),
+                    tostring(event.date) 
+                )
+                table.insert(html, event_html)
             end
 
     -- Part 5: Final Assembly and Output
@@ -167,5 +216,4 @@ function p.render(frame)
         table.insert(html, "</div>")
         return table.concat(html)
 end
-
 return p

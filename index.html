@@ -426,7 +426,8 @@
                 };
                 
                 const jsonString = JSON.stringify(timelineData, null, 2);
-                wikitextOutput.value = `{{Timeline|data=${jsonString}}}`;
+                wikitextOutput.value = `{{Timeline|data=${jsonString}
+                }}`;
             };
 
             const addEventField = () => {
